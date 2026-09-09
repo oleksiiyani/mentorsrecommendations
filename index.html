@@ -38,7 +38,7 @@
   --tip-bg:#FFE6D6;   --tip-bd:var(--orange-2); --tip-tx:#8A3A0F;
 }
 *{box-sizing:border-box}
-html,body{margin:0;padding:0}
+html,body{margin:0;padding:0;overflow-anchor:none}
 html{scroll-behavior:smooth}
 body{
   font-family:"Manrope",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
@@ -261,7 +261,7 @@ footer.site-footer{
     <div class="side-title">Модулі блоку</div>
     <div class="side-list" id="moduleNav"></div>
     <div class="progress-card">
-      <div class="label"><span>Опубліковано модулів</span><span id="progressPct">0%</span></div>
+      <div class="label"><span>Прогрес читання</span><span id="progressPct">0%</span></div>
       <div class="bar"><div class="fill" id="progressFill" style="width:0%"></div></div>
     </div>
   </aside>
@@ -334,7 +334,12 @@ function renderBlockNav(){
     btn.disabled = !b.enabled;
     btn.innerHTML = '<span class="dot"></span>' + escapeHtml(b.title) + (b.enabled ? "" : '<span class="soon">незабаром</span>');
     if (b.enabled){
-      btn.addEventListener("click", () => { state.block = b.id; state.module = b.modules[0]; renderAll(); });
+      btn.addEventListener("click", () => {
+        state.block = b.id; state.module = b.modules[0];
+        renderAll();
+        window.scrollTo({top:0, left:0, behavior:'instant'});
+        updateReadProgress();
+      });
     }
     nav.appendChild(btn);
   });
@@ -351,18 +356,35 @@ function renderModuleNav(){
     btn.disabled = !hasData;
     btn.innerHTML = '<span>Модуль ' + m + '</span>' + (hasData ? '' : '<span class="soon">незабаром</span>');
     if (hasData){
-      btn.addEventListener("click", () => { state.module = m; renderCards(); renderModuleNav(); renderBanner(); });
+      btn.addEventListener("click", () => {
+        state.module = m;
+        renderCards(); renderModuleNav(); renderBanner();
+        window.scrollTo({top:0, left:0, behavior:'instant'});
+        updateReadProgress();
+      });
     }
     nav.appendChild(btn);
   });
 }
 
-function renderProgress(){
-  const publishedModules = new Set(DATA.map(r => r.module)).size;
-  const pct = Math.round((publishedModules / TOTAL_MODULES) * 100);
-  document.getElementById("progressPct").textContent = pct + "%";
-  document.getElementById("progressFill").style.width = pct + "%";
+function updateReadProgress(){
+  const scrollTop = window.scrollY || document.documentElement.scrollTop || 0;
+  const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+  const pct = scrollable > 0 ? Math.min(100, Math.max(0, Math.round((scrollTop / scrollable) * 100))) : 100;
+  const pctEl = document.getElementById("progressPct");
+  const fillEl = document.getElementById("progressFill");
+  if (pctEl) pctEl.textContent = pct + "%";
+  if (fillEl) fillEl.style.width = pct + "%";
 }
+
+let progressTicking = false;
+window.addEventListener("scroll", () => {
+  if (!progressTicking){
+    window.requestAnimationFrame(() => { updateReadProgress(); progressTicking = false; });
+    progressTicking = true;
+  }
+}, {passive:true});
+window.addEventListener("resize", updateReadProgress);
 
 function renderBanner(){
   const info = MODULE_TITLES[state.module] || {title:"", desc:""};
@@ -464,9 +486,9 @@ function renderCards(){
 function renderAll(){
   renderBlockNav();
   renderModuleNav();
-  renderProgress();
   renderBanner();
   renderCards();
+  updateReadProgress();
 }
 
 document.getElementById("searchInput").addEventListener("input", (e) => { state.search = e.target.value.trim(); renderCards(); });
