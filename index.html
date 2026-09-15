@@ -238,8 +238,25 @@ main.content{min-width:0}
 }
 
 footer.site-footer{
-  max-width:1280px;margin:0 auto;padding:10px 20px 60px;
+  max-width:1280px;margin:0 auto;padding:24px 20px 60px;
   text-align:center;color:var(--muted);font-size:12.5px;font-weight:600;
+}
+.brandmark{
+  display:inline-flex;align-items:baseline;gap:10px;justify-content:center;
+  flex-wrap:wrap;
+}
+.brandmark .word{
+  font-size:19px;font-weight:800;letter-spacing:-.01em;color:var(--black);
+  line-height:1;
+}
+.brandmark .tilt{
+  display:inline-block;color:var(--orange-2);
+  transform:skewX(-10deg);
+  font-style:normal;
+}
+.brandmark .year{
+  font-size:11.5px;font-weight:700;color:var(--muted);
+  letter-spacing:.06em;
 }
 </style>
 </head>
@@ -284,7 +301,7 @@ footer.site-footer{
 </div>
 
 <footer class="site-footer">
-  Матеріал для менторів напрямку Data Analyst · оновлюється по модулях · Успіхів! 🎓
+  <span class="brandmark"><span class="word">BETTER<span class="tilt">ED</span></span><span class="year">2026</span></span>
 </footer>
 
 <script>
